@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health360 | Healthcare Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="/"><span class="brand-mark">✚</span><span>health<span class="brand-light">360</span></span></a>
+    <div class="workspace-label">WORKSPACE</div>
+    <nav class="nav">
+      <a class="nav-link active" href="#overview" data-section="overview"><span class="nav-icon">▦</span> Overview</a>
+      <a class="nav-link" href="#diseases" data-section="diseases"><span class="nav-icon">⌁</span> Disease analytics</a>
+      <a class="nav-link" href="#demographics" data-section="demographics"><span class="nav-icon">◉</span> Demographics</a>
+      <a class="nav-link" href="#risk" data-section="risk"><span class="nav-icon">△</span> Risk insights</a>
+      <a class="nav-link" href="#story" data-section="story"><span class="nav-icon">▤</span> Health story</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="help-card"><div class="help-icon">?</div><strong>Need a hand?</strong><p>Explore the insights and learn what the numbers mean.</p><a href="#about">About this dashboard ↗</a></div>
+      <div class="profile"><div class="avatar">H</div><div><strong>Health360 Team</strong><small>Analytics workspace</small></div><span class="dots">•••</span></div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">☰</button>
+      <div class="breadcrumbs">Workspace <span>/</span> <strong>Healthcare overview</strong></div>
+      <div class="top-actions"><span class="live-dot"></span><span class="updated-label">Demo dashboard</span><button class="export-btn" onclick="window.print()">↥ Export / Print</button></div>
+    </header>
+
+    <section class="page-heading" id="overview">
+      <div><div class="eyebrow"><span class="eyebrow-dot"></span> HEALTH INTELLIGENCE</div><h1>Healthcare overview</h1><p class="subheading">A clearer picture of population health, disease patterns, and risk factors.</p></div>
+      <div class="heading-controls"><label for="period">Reporting period</label><select id="period"><option>All available data</option><option>Last 12 months</option><option>Last 90 days</option></select></div>
+    </section>
+
+    <div class="notice"><span class="notice-symbol">i</span><span><strong>Demo data:</strong> The figures shown here are illustrative placeholders, not real clinical data or verified values from the linked Tableau workbook.</span></div>
+
+    <section class="metric-grid">
+      <article class="metric-card"><div class="metric-top"><span>Total patients</span><span class="metric-icon teal">♙</span></div><div class="metric-value">{{ "{:,}".format(summary.patients) }}</div><div class="metric-foot"><span class="trend positive">↗ 8.2%</span><span>vs. previous period</span></div><div class="sparkline teal-line"></div></article>
+      <article class="metric-card"><div class="metric-top"><span>High-risk population</span><span class="metric-icon coral">⌁</span></div><div class="metric-value">{{ summary.high_risk }}<small>%</small></div><div class="metric-foot"><span class="trend negative">↗ 1.4%</span><span>needs monitoring</span></div><div class="sparkline coral-line"></div></article>
+      <article class="metric-card"><div class="metric-top"><span>Average patient age</span><span class="metric-icon violet">◷</span></div><div class="metric-value">{{ summary.avg_age }}<small> yrs</small></div><div class="metric-foot"><span class="trend neutral">— 0.3%</span><span>stable vs. last period</span></div><div class="sparkline violet-line"></div></article>
+      <article class="metric-card"><div class="metric-top"><span>Conditions tracked</span><span class="metric-icon amber">✚</span></div><div class="metric-value">{{ summary.conditions }}</div><div class="metric-foot"><span class="trend positive">● Active</span><span>across this demo</span></div><div class="sparkline amber-line"></div></article>
+    </section>
+
+    <section class="chart-grid">
+      <article class="panel wide-panel" id="diseases">
+        <div class="panel-heading"><div><h2>Disease distribution</h2><p>Patient count by reported condition</p></div><button class="more-btn" aria-label="More options">•••</button></div>
+        <div class="chart-wrap bar-wrap"><canvas id="diseaseChart" aria-label="Disease distribution bar chart"></canvas></div>
+        <div class="chart-legend"><span><i class="legend-dot"></i> Patients by condition</span><span class="legend-note">Illustrative sample</span></div>
+      </article>
+      <article class="panel" id="demographics">
+        <div class="panel-heading"><div><h2>Age profile</h2><p>Share of patient population</p></div><button class="more-btn" aria-label="More options">•••</button></div>
+        <div class="donut-wrap"><canvas id="ageChart" aria-label="Age profile doughnut chart"></canvas><div class="donut-center"><strong>100%</strong><span>population</span></div></div>
+        <div class="age-legend">{% for group in age_groups %}<div class="legend-row"><span class="age-label"><i class="age-dot dot-{{ loop.index }}"></i>{{ group.label }}</span><strong>{{ group.value }}%</strong></div>{% endfor %}</div>
+      </article>
+    </section>
+
+    <section class="chart-grid lower-grid" id="risk">
+      <article class="panel">
+        <div class="panel-heading"><div><h2>Risk overview</h2><p>Risk category by condition</p></div><span class="pill">8 conditions</span></div>
+        <div class="risk-list">
+          {% for disease in diseases %}
+          <div class="risk-row"><div class="risk-name">{{ disease.name }}</div><div class="risk-track"><div class="risk-fill {{ disease.risk|lower }}" style="width: {{ disease.rate * 3.5 if disease.rate * 3.5 < 100 else 100 }}%"></div></div><span class="risk-tag {{ disease.risk|lower }}">{{ disease.risk }}</span></div>
+          {% endfor %}
+        </div>
+      </article>
+      <article class="panel" id="story">
+        <div class="panel-heading"><div><h2>Key observations</h2><p>What stands out in this sample</p></div><span class="insight-badge">✦ Insights</span></div>
+        <div class="insight-card"><span class="insight-icon coral-bg">↗</span><div><strong>Hypertension leads the sample</strong><p>It has the largest patient count among the conditions listed.</p></div></div>
+        <div class="insight-card"><span class="insight-icon teal-bg">◷</span><div><strong>Middle-age groups are prominent</strong><p>The 40–59 age groups account for a notable share in this illustrative profile.</p></div></div>
+        <div class="insight-card"><span class="insight-icon violet-bg">◎</span><div><strong>Use risk labels as a guide</strong><p>Prioritization should be based on validated clinical criteria, not this demo.</p></div></div>
+      </article>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-heading table-heading"><div><h2>Condition breakdown</h2><p>Explore the sample counts and relative share</p></div><div class="table-tools"><input type="search" id="tableSearch" placeholder="Search conditions..." aria-label="Search conditions"><button class="export-btn small" id="downloadCsv">↓ Download CSV</button></div></div>
+      <div class="table-scroll"><table id="diseaseTable"><thead><tr><th>Condition <span>↕</span></th><th>Patients <span>↕</span></th><th>Share <span>↕</span></th><th>Risk level</th><th>Status</th></tr></thead><tbody>
+        {% for disease in diseases %}<tr><td><span class="condition-icon">✚</span><strong>{{ disease.name }}</strong></td><td>{{ "{:,}".format(disease.patients) }}</td><td><div class="share-cell"><div class="mini-track"><div style="width:{{ disease.rate * 3.5 if disease.rate * 3.5 < 100 else 100 }}%"></div></div><span>{{ disease.rate }}%</span></div></td><td><span class="risk-tag {{ disease.risk|lower }}">{{ disease.risk }}</span></td><td><span class="status"><i></i> Tracked</span></td></tr>{% endfor %}
+      </tbody></table></div>
+      <div class="table-footer"><span id="rowCount">Showing {{ diseases|length }} conditions</span><span>Sample dataset · For demonstration only</span></div>
+    </section>
+
+    <footer id="about"><span>© 2026 Health360 Analytics</span><span>Built with Flask · Data is illustrative and not medical advice</span></footer>
+  </main>
+</div>
+<script>
+const diseases = {{ diseases|tojson }};
+const ages = {{ age_groups|tojson }};
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.color = "#8993a5";
+new Chart(document.getElementById('diseaseChart'), {
+  type: 'bar',
+  data: { labels: diseases.map(d => d.name), datasets: [{ label: 'Patients', data: diseases.map(d => d.patients), backgroundColor: ['#36b8a6','#5b8def','#8c7cf0','#f3b65b','#ef8d85','#61a8d8','#a2b7bd','#c5a7df'], borderRadius: 6, borderSkipped: false, maxBarThickness: 34 }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#172338', padding: 12, displayColors: false } }, scales: { x: { grid: { display: false }, border: { display: false }, ticks: { maxRotation: 0, minRotation: 0 } }, y: { beginAtZero: true, grid: { color: '#edf0f5' }, border: { display: false }, ticks: { stepSize: 500, padding: 10 } } } }
+});
+new Chart(document.getElementById('ageChart'), {
+  type: 'doughnut',
+  data: { labels: ages.map(a => a.label), datasets: [{ data: ages.map(a => a.value), backgroundColor: ['#36b8a6','#5b8def','#8c7cf0','#f3b65b','#ef8d85','#a8b5c7'], borderWidth: 3, borderColor: '#fff', hoverOffset: 5 }] },
+  options: { cutout: '73%', maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#172338', padding: 10 } } }
+});
+const search = document.getElementById('tableSearch');
+search.addEventListener('input', () => {
+  let shown = 0;
+  document.querySelectorAll('#diseaseTable tbody tr').forEach(row => {
+    const match = row.textContent.toLowerCase().includes(search.value.toLowerCase());
+    row.style.display = match ? '' : 'none'; if (match) shown++;
+  });
+  document.getElementById('rowCount').textContent = `Showing ${shown} condition${shown === 1 ? '' : 's'}`;
+});
+document.getElementById('downloadCsv').addEventListener('click', () => {
+  const rows = [['Condition','Patients','Risk level','Share (%)'], ...diseases.map(d => [d.name,d.patients,d.risk,d.rate])];
+  const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"','""')}"`).join(',')).join('\\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'health360-condition-breakdown.csv'; link.click(); URL.revokeObjectURL(link.href);
+});
+document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', () => {
+  document.querySelectorAll('.nav-link').forEach(item => item.classList.remove('active'));
+  link.classList.add('active'); document.getElementById('sidebar').classList.remove('open');
+}));
+</script>
+</body>
+</html>
