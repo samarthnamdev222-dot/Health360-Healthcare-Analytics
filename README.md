@@ -2,6 +2,7 @@
 
 A responsive healthcare analytics dashboard built with Python + Flask, HTML, CSS and Chart.js.
 The included figures are illustrative demo data, not real patient data and not copied from the linked Tableau workbook.
+Tableau public dashboard link https://public.tableau.com/views/Health360_ComprehensiveHealthcareRiskDiseaseAnalytics_17935331219980/SmartHealthcareAnalyticsPatientRiskLifestyleInsights?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link 
 
 ## Run on Windows
 
